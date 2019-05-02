@@ -1,6 +1,6 @@
 package fr.adventiel.innov.geolocalisationacquire.controller;
 
-import fr.adventiel.innov.geolocalisationacquire.dto.DeviceDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceDto;
 import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceLocationDto;
 import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceStateDto;
 import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceLocationMapper;
@@ -32,13 +32,13 @@ public class DeviceController {
 
     @CrossOrigin
     @GetMapping("/device/{deviceId}/locations")
-    List<DeviceLocationDto> getLocations(@RequestParam Long deviceId) {
+    List<DeviceLocationDto> getLocations(@RequestParam String deviceId) {
         return deviceLocationMapper.toDeviceLocationDtos(deviceLocationRepository.findByDeviceId(deviceId));
     }
 
     @CrossOrigin
     @GetMapping("/device/{deviceId}/state")
-    DeviceStateDto getDeviceState(@PathVariable final Long deviceId) {
+    DeviceStateDto getDeviceState(@PathVariable final String deviceId) {
         return deviceStateMapper.toDeviceStateDto(this.deviceStateRepository.findById(deviceId));
     }
 }

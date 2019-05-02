@@ -1,7 +1,6 @@
 package fr.adventiel.innov.geolocalisationacquire.domain;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -9,8 +8,7 @@ import java.util.Date;
 @Document
 @Data
 public class DeviceState {
-    @Id
-    private long id;
+    private String id;
     private String status;
     private int uplinkCount;
     private Date lastUplink;

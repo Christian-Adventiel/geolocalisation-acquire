@@ -8,7 +8,7 @@ import java.util.Date;
 @Data
 public class DeviceStateDto {
     @JsonProperty(value = "id")
-    private long id;
+    private String id;
     @JsonProperty(value = "status")
     private String status;
     @JsonProperty(value = "uplink_count")

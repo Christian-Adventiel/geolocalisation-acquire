@@ -2,9 +2,8 @@ package fr.adventiel.innov.geolocalisationacquire.importer;
 
 import fr.adventiel.innov.geolocalisationacquire.domain.Device;
 import fr.adventiel.innov.geolocalisationacquire.domain.DeviceLocation;
-import fr.adventiel.innov.geolocalisationacquire.dto.DeviceDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceDto;
 import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceLocationWrapperDto;
-import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceStateDto;
 import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DevicesStatesWrapperDto;
 import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceLocationMapper;
 import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceMapper;
@@ -69,7 +68,7 @@ public class ImportServiceImpl implements ImportService {
     private void importDevicesStates() {
         List<Device> devices = deviceRepository.findAll();
 
-        String devicesListString = devices.stream().map(device -> Long.toString(device.getId())).collect(Collectors.joining( "," ));
+        String devicesListString = devices.stream().map(device -> device.getId()).collect(Collectors.joining( "," ));
 
         UriComponentsBuilder builder = UriComponentsBuilder
         .fromUriString(devicesStatesUrl)
@@ -89,7 +88,7 @@ public class ImportServiceImpl implements ImportService {
         List<Device> devices = deviceRepository.findAll();
         devices.forEach(
                 device -> {
-                    DeviceLocationWrapperDto deviceLocationWrapperDto = restTemplate.getForObject(MessageFormat.format(deviceLocationUrl, Long.toString(device.getId())), DeviceLocationWrapperDto.class);
+                    DeviceLocationWrapperDto deviceLocationWrapperDto = restTemplate.getForObject(MessageFormat.format(deviceLocationUrl, device.getId()), DeviceLocationWrapperDto.class);
 
                     deviceLocationWrapperDto.getLocations().forEach(
                             deviceLocationDto -> {

@@ -13,5 +13,5 @@ public class DeviceLocation {
     private int geolocationPrecision;
     private String cityName;
     private int cityCode;
-    private long deviceId;
+    private String deviceId;
 }

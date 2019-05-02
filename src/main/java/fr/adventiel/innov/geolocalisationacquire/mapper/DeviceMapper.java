@@ -1,7 +1,7 @@
 package fr.adventiel.innov.geolocalisationacquire.mapper;
 
 import fr.adventiel.innov.geolocalisationacquire.domain.Device;
-import fr.adventiel.innov.geolocalisationacquire.dto.DeviceDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceDto;
 import org.mapstruct.Mapper;
 
 import java.util.List;

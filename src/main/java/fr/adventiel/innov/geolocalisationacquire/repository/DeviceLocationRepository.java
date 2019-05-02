@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 public interface DeviceLocationRepository extends MongoRepository<DeviceLocation, Long> {
-    DeviceLocation findByTimestampAndDeviceId(Date ts, long deviceId);
+    DeviceLocation findByTimestampAndDeviceId(Date ts, String deviceId);
 
-    List<DeviceLocation> findByDeviceId(long deviceId);
+    List<DeviceLocation> findByDeviceId(String deviceId);
 }
