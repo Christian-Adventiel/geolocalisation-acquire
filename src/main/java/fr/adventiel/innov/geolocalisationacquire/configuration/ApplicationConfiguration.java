@@ -1,34 +1,17 @@
 package fr.adventiel.innov.geolocalisationacquire.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * Created by Anto on 02/05/19.
+ */
 @Configuration
-public class ApplicationConfiguration {
+public interface ApplicationConfiguration {
 
     /**
-     * Objenious API Key.
+     * Return needed override rest template
+     * @return see desc moron
      */
-    @Value(value = "${objenious.apikey}")
-    private String apikey;
-
-    /**
-     * Add generic token header to RestTemplate.
-     * @return
-     */
-    @Bean
-    RestTemplate restTemplate() {
-        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-        interceptors.add(new HeaderRequestInterceptor("apikey", apikey));
-
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setInterceptors(interceptors);
-        return restTemplate;
-    }
+    RestTemplate restTemplate();
 }

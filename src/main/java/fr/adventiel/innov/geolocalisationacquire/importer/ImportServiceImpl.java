@@ -13,6 +13,7 @@ import fr.adventiel.innov.geolocalisationacquire.repository.DeviceRepository;
 import fr.adventiel.innov.geolocalisationacquire.repository.DeviceStateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -29,7 +30,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ImportServiceImpl implements ImportService {
-    private final RestTemplate restTemplate;
+
+    @Qualifier("objenious")
+    private final RestTemplate objeniousRestTemplate;
+    @Qualifier("baliz")
+    private final RestTemplate balizRestTemplate;
+
     private final DeviceRepository deviceRepository;
     private final DeviceStateRepository deviceStateRepository;
     private final DeviceLocationRepository deviceLocationRepository;
@@ -55,7 +61,7 @@ public class ImportServiceImpl implements ImportService {
      * Import devices from Objenious to MongoDB.
      */
     private void importDevice() {
-        ResponseEntity<List<DeviceDto>> deviceDtoResponse = restTemplate.exchange(devicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<DeviceDto>>() {});
+        ResponseEntity<List<DeviceDto>> deviceDtoResponse = objeniousRestTemplate.exchange(devicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<DeviceDto>>() {});
 
         deviceDtoResponse.getBody().forEach(
                 deviceDto -> deviceRepository.save(deviceMapper.toDevice(deviceDto))
@@ -74,7 +80,7 @@ public class ImportServiceImpl implements ImportService {
         .fromUriString(devicesStatesUrl)
         .queryParam("id", devicesListString);
 
-        DevicesStatesWrapperDto devicesStatesWrapperDto = restTemplate.getForObject(builder.toUriString(), DevicesStatesWrapperDto.class);
+        DevicesStatesWrapperDto devicesStatesWrapperDto = objeniousRestTemplate.getForObject(builder.toUriString(), DevicesStatesWrapperDto.class);
 
         devicesStatesWrapperDto.getStates().forEach(
                 deviceStateDto -> deviceStateRepository.save(deviceStateMapper.toDeviceState(deviceStateDto))
@@ -88,7 +94,7 @@ public class ImportServiceImpl implements ImportService {
         List<Device> devices = deviceRepository.findAll();
         devices.forEach(
                 device -> {
-                    DeviceLocationWrapperDto deviceLocationWrapperDto = restTemplate.getForObject(MessageFormat.format(deviceLocationUrl, device.getId()), DeviceLocationWrapperDto.class);
+                    DeviceLocationWrapperDto deviceLocationWrapperDto = objeniousRestTemplate.getForObject(MessageFormat.format(deviceLocationUrl, device.getId()), DeviceLocationWrapperDto.class);
 
                     deviceLocationWrapperDto.getLocations().forEach(
                             deviceLocationDto -> {
