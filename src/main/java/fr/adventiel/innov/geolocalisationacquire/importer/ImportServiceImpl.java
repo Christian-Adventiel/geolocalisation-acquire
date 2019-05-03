@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ImportServiceImpl implements ImportService {
 
-    @Qualifier("objenious")
+    @Qualifier("objeniousRestTemplate")
     private final RestTemplate objeniousRestTemplate;
-    @Qualifier("baliz")
+    @Qualifier("balizRestTemplate")
     private final RestTemplate balizRestTemplate;
 
     private final DeviceRepository deviceRepository;
