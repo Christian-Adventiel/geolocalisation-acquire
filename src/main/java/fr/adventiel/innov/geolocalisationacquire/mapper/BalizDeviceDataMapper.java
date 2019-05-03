@@ -9,4 +9,6 @@ import fr.adventiel.innov.geolocalisationacquire.dto.baliz.BalizDeviceDataDto;
 public interface BalizDeviceDataMapper {
 
     BalizDeviceData toBalizDeviceData(BalizDeviceDataDto balizDeviceDataDto);
+
+    BalizDeviceDataDto toBalizDeviceDataDto(BalizDeviceData balizDeviceData);
 }

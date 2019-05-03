@@ -7,4 +7,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  * {@link BalizDeviceData} repository
  * Created by Anto on 03/05/19.
  */
-public interface BalizDeviceDataRepository extends MongoRepository<BalizDeviceData, Long> {}
+public interface BalizDeviceDataRepository extends MongoRepository<BalizDeviceData, Long> {
+    BalizDeviceData findById(String id);
+}
