@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class DeviceDataDto {
+public class ObjeniousDeviceDataDto {
     @JsonProperty(value = "application_id")
     private int applicationId;
     @JsonProperty(value = "battery_level")

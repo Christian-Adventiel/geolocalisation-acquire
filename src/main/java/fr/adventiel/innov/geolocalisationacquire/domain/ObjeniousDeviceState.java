@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Document
 @Data
-public class DeviceState {
+public class ObjeniousDeviceState {
     private String id;
     private String status;
     private int uplinkCount;
@@ -17,5 +17,5 @@ public class DeviceState {
     private double lat;
     private double lng;
     private String geolocationType;
-    private DeviceData deviceData;
+    private ObjeniousDeviceData objeniousDeviceData;
 }
