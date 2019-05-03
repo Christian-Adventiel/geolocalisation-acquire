@@ -44,24 +44,29 @@ public class ImportServiceImpl implements ImportService {
     private final DeviceLocationMapper deviceLocationMapper;
 
     @Value(value = "${objenious.enpoints.devices}")
-    private String devicesUrl;
+    private String objeniousDevicesUrl;
     @Value(value = "${objenious.enpoints.devicesStates}")
-    private String devicesStatesUrl;
+    private String objeniousDevicesStatesUrl;
     @Value(value = "${objenious.enpoints.deviceLocation}")
-    private String deviceLocationUrl;
+    private String objeniousDeviceLocationUrl;
+
+    @Value(value = "${baliz.endpoints.devices}")
+    private String balizDevicesUrl;
+    @Value(value = "${baliz.endpoints.device.data}")
+    private String balizDevicesDataUrl;
 
     @Override
     public void doImport() {
-        importDevice();
-        importDevicesStates();
-        importDevicesLocations();
+        importObjeniousDevice();
+        importObjeniousDevicesStates();
+        importObjeniousDevicesLocations();
     }
 
     /**
      * Import devices from Objenious to MongoDB.
      */
-    private void importDevice() {
-        ResponseEntity<List<DeviceDto>> deviceDtoResponse = objeniousRestTemplate.exchange(devicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<DeviceDto>>() {});
+    private void importObjeniousDevice() {
+        ResponseEntity<List<DeviceDto>> deviceDtoResponse = objeniousRestTemplate.exchange(objeniousDevicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<DeviceDto>>() {});
 
         deviceDtoResponse.getBody().forEach(
                 deviceDto -> deviceRepository.save(deviceMapper.toDevice(deviceDto))
@@ -71,13 +76,13 @@ public class ImportServiceImpl implements ImportService {
     /**
      * Import devices states. One state per device, as per the API.
      */
-    private void importDevicesStates() {
+    private void importObjeniousDevicesStates() {
         List<Device> devices = deviceRepository.findAll();
 
         String devicesListString = devices.stream().map(device -> device.getId()).collect(Collectors.joining( "," ));
 
         UriComponentsBuilder builder = UriComponentsBuilder
-        .fromUriString(devicesStatesUrl)
+        .fromUriString(objeniousDevicesStatesUrl)
         .queryParam("id", devicesListString);
 
         DevicesStatesWrapperDto devicesStatesWrapperDto = objeniousRestTemplate.getForObject(builder.toUriString(), DevicesStatesWrapperDto.class);
@@ -90,11 +95,11 @@ public class ImportServiceImpl implements ImportService {
     /**
      * Import devices locations history. Objenious only keeps the last 10 locations.
      */
-    private void importDevicesLocations() {
+    private void importObjeniousDevicesLocations() {
         List<Device> devices = deviceRepository.findAll();
         devices.forEach(
                 device -> {
-                    DeviceLocationWrapperDto deviceLocationWrapperDto = objeniousRestTemplate.getForObject(MessageFormat.format(deviceLocationUrl, device.getId()), DeviceLocationWrapperDto.class);
+                    DeviceLocationWrapperDto deviceLocationWrapperDto = objeniousRestTemplate.getForObject(MessageFormat.format(objeniousDeviceLocationUrl, device.getId()), DeviceLocationWrapperDto.class);
 
                     deviceLocationWrapperDto.getLocations().forEach(
                             deviceLocationDto -> {
@@ -108,4 +113,5 @@ public class ImportServiceImpl implements ImportService {
                 }
         );
     }
+
 }
