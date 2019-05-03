@@ -16,16 +16,38 @@ public class ApplicationConfiguration {
      * Objenious API Key.
      */
     @Value(value = "${objenious.apikey}")
-    private String apikey;
+    private String objeniousApiKey;
 
     /**
-     * Add generic token header to RestTemplate.
+     * Baliz API Key.
+     */
+    @Value(value = "${baliz.apikey}")
+    private String balizApiKey;
+
+    /**
+     * Add generic token header to Baliz RestTemplate.
+     *
      * @return
      */
-    @Bean
-    RestTemplate restTemplate() {
+    @Bean(name = "balizRestTemplate")
+    public RestTemplate restTemplateBaliz() {
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-        interceptors.add(new HeaderRequestInterceptor("apikey", apikey));
+        interceptors.add(new HeaderRequestInterceptor("balizApiKey", balizApiKey));
+
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setInterceptors(interceptors);
+        return restTemplate;
+    }
+
+    /**
+     * Add generic token header to Objenious RestTemplate.
+     *
+     * @return see desc genius
+     */
+    @Bean(name = "objeniousRestTemplate")
+    public RestTemplate restTemplateObjenious() {
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+        interceptors.add(new HeaderRequestInterceptor("objeniousApiKey", objeniousApiKey));
 
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setInterceptors(interceptors);
