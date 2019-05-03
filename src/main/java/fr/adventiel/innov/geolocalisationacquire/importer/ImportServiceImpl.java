@@ -1,16 +1,15 @@
 package fr.adventiel.innov.geolocalisationacquire.importer;
 
+import fr.adventiel.innov.geolocalisationacquire.domain.BalizDevice;
 import fr.adventiel.innov.geolocalisationacquire.domain.Device;
 import fr.adventiel.innov.geolocalisationacquire.domain.DeviceLocation;
+import fr.adventiel.innov.geolocalisationacquire.dto.baliz.BalizDeviceDataWrapperDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.baliz.BalizDeviceDto;
 import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceDto;
 import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceLocationWrapperDto;
 import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DevicesStatesWrapperDto;
-import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceLocationMapper;
-import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceMapper;
-import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceStateMapper;
-import fr.adventiel.innov.geolocalisationacquire.repository.DeviceLocationRepository;
-import fr.adventiel.innov.geolocalisationacquire.repository.DeviceRepository;
-import fr.adventiel.innov.geolocalisationacquire.repository.DeviceStateRepository;
+import fr.adventiel.innov.geolocalisationacquire.mapper.*;
+import fr.adventiel.innov.geolocalisationacquire.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,9 +38,16 @@ public class ImportServiceImpl implements ImportService {
     private final DeviceRepository deviceRepository;
     private final DeviceStateRepository deviceStateRepository;
     private final DeviceLocationRepository deviceLocationRepository;
+
+    private final BalizDeviceRepository balizDeviceRepository;
+    private final BalizDeviceDataRepository balizDeviceDataRepository;
+
     private final DeviceMapper deviceMapper;
     private final DeviceStateMapper deviceStateMapper;
     private final DeviceLocationMapper deviceLocationMapper;
+
+    private final BalizDeviceMapper balizDeviceMapper;
+    private final BalizDeviceDataMapper balizDeviceDataMapper;
 
     @Value(value = "${objenious.enpoints.devices}")
     private String objeniousDevicesUrl;
@@ -60,13 +66,16 @@ public class ImportServiceImpl implements ImportService {
         importObjeniousDevice();
         importObjeniousDevicesStates();
         importObjeniousDevicesLocations();
+
+        importBalizDevice();
+        importBalizDeviceData();
     }
 
     /**
      * Import devices from Objenious to MongoDB.
      */
     private void importObjeniousDevice() {
-        ResponseEntity<List<DeviceDto>> deviceDtoResponse = objeniousRestTemplate.exchange(objeniousDevicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<DeviceDto>>() {});
+        ResponseEntity<List<DeviceDto>> deviceDtoResponse = objeniousRestTemplate.exchange(objeniousDevicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
 
         deviceDtoResponse.getBody().forEach(
                 deviceDto -> deviceRepository.save(deviceMapper.toDevice(deviceDto))
@@ -112,6 +121,34 @@ public class ImportServiceImpl implements ImportService {
                     );
                 }
         );
+    }
+
+
+    /**
+     * Import baliz devices from magrenouille (mdr) to mongo
+     */
+    private void importBalizDevice() {
+        ResponseEntity<List<BalizDeviceDto>> balizDeviceDtoResponse = balizRestTemplate.exchange(balizDevicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
+
+        balizDeviceDtoResponse.getBody().forEach(
+                balizDeviceDto -> balizDeviceRepository.save(balizDeviceMapper.toBalizDevice(balizDeviceDto))
+        );
+    }
+
+    /**
+     * Import all baliz devices data from magrenouille to mongo
+     */
+    private void importBalizDeviceData() {
+
+        String balizDevicesListString = balizDeviceRepository.findAll().stream().map(BalizDevice::getId).collect(Collectors.joining( "," ));
+
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(balizDevicesDataUrl)
+                .queryParam("device", balizDevicesListString);
+
+        BalizDeviceDataWrapperDto balizDeviceDataWrapperDto = balizRestTemplate.getForObject(builder.toUriString(), BalizDeviceDataWrapperDto.class);
+
+        balizDeviceDataWrapperDto.getBalizDeviceDataDtos().forEach(balizDeviceDataDto -> balizDeviceDataRepository.save(balizDeviceDataMapper.toBalizDeviceData(balizDeviceDataDto)));
     }
 
 }
