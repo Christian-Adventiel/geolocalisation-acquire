@@ -10,6 +10,7 @@ import fr.adventiel.innov.geolocalisationacquire.dto.objenious.ObjeniousDeviceLo
 import fr.adventiel.innov.geolocalisationacquire.dto.objenious.ObjeniousDevicesStatesWrapperDto;
 import fr.adventiel.innov.geolocalisationacquire.mapper.*;
 import fr.adventiel.innov.geolocalisationacquire.repository.*;
+import fr.adventiel.innov.geolocalisationacquire.tools.RandomLocationGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -148,7 +149,12 @@ public class ImportServiceImpl implements ImportService {
 
         BalizDeviceDataWrapperDto balizDeviceDataWrapperDto = balizRestTemplate.getForObject(builder.toUriString(), BalizDeviceDataWrapperDto.class);
 
-        balizDeviceDataWrapperDto.getBalizDeviceDataDtos().forEach(balizDeviceDataDto -> balizDeviceDataRepository.save(balizDeviceDataMapper.toBalizDeviceData(balizDeviceDataDto)));
+        balizDeviceDataWrapperDto.getBalizDeviceDataDtos()
+                .forEach(balizDeviceDataDto ->  {
+                    balizDeviceDataDto.setLatitude(RandomLocationGenerator.randomLatitude());
+                    balizDeviceDataDto.setLongitude(RandomLocationGenerator.randomLongitude());
+                    balizDeviceDataRepository.save(balizDeviceDataMapper.toBalizDeviceData(balizDeviceDataDto));
+                });
     }
 
 }

@@ -18,4 +18,6 @@ public class BalizDeviceData {
     private Long humidity;
     private Long luminosity;
     private Double battery;
+    private Double latitude;
+    private Double longitude;
 }
