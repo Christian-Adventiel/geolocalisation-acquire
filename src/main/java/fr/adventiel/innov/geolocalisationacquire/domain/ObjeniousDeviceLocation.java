@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class DeviceLocation {
+public class ObjeniousDeviceLocation {
     private Date timestamp;
     private double latitude;
     private double longitude;

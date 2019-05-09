@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class DeviceData {
+public class ObjeniousDeviceData {
     private int applicationId;
     private float batteryLevel;
     private float cap;

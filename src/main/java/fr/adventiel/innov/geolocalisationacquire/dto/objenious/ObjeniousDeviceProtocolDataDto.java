@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class DeviceProtocolDataDto {
+public class ObjeniousDeviceProtocolDataDto {
     @JsonProperty(value = "appnonce")
     private String appnonce;
     @JsonProperty(value = "devaddr")

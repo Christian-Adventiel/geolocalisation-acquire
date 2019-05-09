@@ -6,9 +6,9 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class DeviceLocationWrapperDto {
+public class ObjeniousDeviceLocationWrapperDto {
     @JsonProperty(value = "locations")
-    List<DeviceLocationDto> locations;
+    List<ObjeniousDeviceLocationDto> locations;
     @JsonProperty(value = "start_exclusive")
     String startExclusive;
 }

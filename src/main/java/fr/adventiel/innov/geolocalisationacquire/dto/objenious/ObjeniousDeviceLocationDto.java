@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class DeviceLocationDto {
+public class ObjeniousDeviceLocationDto {
     @JsonProperty(value = "timestamp")
     private Date timestamp;
     @JsonProperty(value = "latitude")

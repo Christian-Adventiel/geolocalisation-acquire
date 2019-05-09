@@ -1,44 +1,62 @@
 package fr.adventiel.innov.geolocalisationacquire.controller;
 
-import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceDto;
-import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceLocationDto;
-import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceStateDto;
-import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceLocationMapper;
-import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceMapper;
-import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceStateMapper;
-import fr.adventiel.innov.geolocalisationacquire.repository.DeviceLocationRepository;
-import fr.adventiel.innov.geolocalisationacquire.repository.DeviceRepository;
-import fr.adventiel.innov.geolocalisationacquire.repository.DeviceStateRepository;
+import fr.adventiel.innov.geolocalisationacquire.dto.baliz.BalizDeviceDataDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.baliz.BalizDeviceDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.objenious.ObjeniousDeviceDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.objenious.ObjeniousDeviceLocationDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.objenious.ObjeniousDeviceStateDto;
+import fr.adventiel.innov.geolocalisationacquire.mapper.*;
+import fr.adventiel.innov.geolocalisationacquire.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController(value = "/device")
+/**
+ * Controller for all devices
+ */
+@RestController(value = "/devices")
 @RequiredArgsConstructor
 public class DeviceController {
-    private final DeviceStateRepository deviceStateRepository;
-    private final DeviceLocationRepository deviceLocationRepository;
-    private final DeviceMapper deviceMapper;
-    private final DeviceStateMapper deviceStateMapper;
-    private final DeviceLocationMapper deviceLocationMapper;
-    private final DeviceRepository deviceRepository;
+    private final ObjeniousDeviceStateRepository objeniousDeviceStateRepository;
+    private final ObjeniousDeviceLocationRepository objeniousDeviceLocationRepository;
+    private final ObjeniousDeviceMapper objeniousDeviceMapper;
+    private final ObjeniousDeviceStateMapper objeniousDeviceStateMapper;
+    private final ObjeniousDeviceLocationMapper objeniousDeviceLocationMapper;
+    private final ObjeniousDeviceRepository objeniousDeviceRepository;
+
+    private final BalizDeviceRepository balizDeviceRepository;
+    private final BalizDeviceDataRepository balizDeviceDataRepository;
+    private final BalizDeviceMapper balizDeviceMapper;
+    private final BalizDeviceDataMapper balizDeviceDataMapper;
 
     @CrossOrigin
-    @GetMapping("/devices")
-    List<DeviceDto> findAll() {
-        return deviceMapper.toDeviceDtos(deviceRepository.findAll());
+    @GetMapping("/objenious")
+    List<ObjeniousDeviceDto> findAllObjenious() {
+        return objeniousDeviceMapper.toDeviceDtos(objeniousDeviceRepository.findAll());
     }
 
     @CrossOrigin
-    @GetMapping("/device/{deviceId}/locations")
-    List<DeviceLocationDto> getLocations(@RequestParam String deviceId) {
-        return deviceLocationMapper.toDeviceLocationDtos(deviceLocationRepository.findByDeviceId(deviceId));
+    @GetMapping("/objenious/{deviceId}/locations")
+    List<ObjeniousDeviceLocationDto> getObjeniousLocations(@RequestParam String deviceId) {
+        return objeniousDeviceLocationMapper.toDeviceLocationDtos(objeniousDeviceLocationRepository.findByDeviceId(deviceId));
     }
 
     @CrossOrigin
-    @GetMapping("/device/{deviceId}/state")
-    DeviceStateDto getDeviceState(@PathVariable final String deviceId) {
-        return deviceStateMapper.toDeviceStateDto(this.deviceStateRepository.findById(deviceId));
+    @GetMapping("/objenious/{deviceId}/state")
+    ObjeniousDeviceStateDto getObjeniousDeviceState(@PathVariable final String deviceId) {
+        return objeniousDeviceStateMapper.toDeviceStateDto(this.objeniousDeviceStateRepository.findById(deviceId));
+    }
+
+    @CrossOrigin
+    @GetMapping("/baliz")
+    List<BalizDeviceDto> findAllBaliz() {
+        return balizDeviceMapper.toBalizDeviceDtos(balizDeviceRepository.findAll());
+    }
+
+    @CrossOrigin
+    @GetMapping("/baliz/{deviceId}/data")
+    BalizDeviceDataDto getBalizData(@PathVariable final String deviceId) {
+        return balizDeviceDataMapper.toBalizDeviceDataDto(balizDeviceDataRepository.findById(deviceId));
     }
 }

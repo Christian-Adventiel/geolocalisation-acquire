@@ -1,9 +1,11 @@
-package fr.adventiel.innov.geolocalisationacquire.dto.objenious;
+package fr.adventiel.innov.geolocalisationacquire.domain;
 
 import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-public class DeviceDto {
+@Document
+public class ObjeniousDevice {
     private String id;
     private String link;
     private String label;

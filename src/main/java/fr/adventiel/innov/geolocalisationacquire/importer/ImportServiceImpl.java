@@ -1,16 +1,15 @@
 package fr.adventiel.innov.geolocalisationacquire.importer;
 
-import fr.adventiel.innov.geolocalisationacquire.domain.Device;
-import fr.adventiel.innov.geolocalisationacquire.domain.DeviceLocation;
-import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceDto;
-import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DeviceLocationWrapperDto;
-import fr.adventiel.innov.geolocalisationacquire.dto.objenious.DevicesStatesWrapperDto;
-import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceLocationMapper;
-import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceMapper;
-import fr.adventiel.innov.geolocalisationacquire.mapper.DeviceStateMapper;
-import fr.adventiel.innov.geolocalisationacquire.repository.DeviceLocationRepository;
-import fr.adventiel.innov.geolocalisationacquire.repository.DeviceRepository;
-import fr.adventiel.innov.geolocalisationacquire.repository.DeviceStateRepository;
+import fr.adventiel.innov.geolocalisationacquire.domain.BalizDevice;
+import fr.adventiel.innov.geolocalisationacquire.domain.ObjeniousDevice;
+import fr.adventiel.innov.geolocalisationacquire.domain.ObjeniousDeviceLocation;
+import fr.adventiel.innov.geolocalisationacquire.dto.baliz.BalizDeviceDataWrapperDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.baliz.BalizDeviceDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.objenious.ObjeniousDeviceDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.objenious.ObjeniousDeviceLocationWrapperDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.objenious.ObjeniousDevicesStatesWrapperDto;
+import fr.adventiel.innov.geolocalisationacquire.mapper.*;
+import fr.adventiel.innov.geolocalisationacquire.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,76 +35,120 @@ public class ImportServiceImpl implements ImportService {
     @Qualifier("balizRestTemplate")
     private final RestTemplate balizRestTemplate;
 
-    private final DeviceRepository deviceRepository;
-    private final DeviceStateRepository deviceStateRepository;
-    private final DeviceLocationRepository deviceLocationRepository;
-    private final DeviceMapper deviceMapper;
-    private final DeviceStateMapper deviceStateMapper;
-    private final DeviceLocationMapper deviceLocationMapper;
+    private final ObjeniousDeviceRepository objeniousDeviceRepository;
+    private final ObjeniousDeviceStateRepository objeniousDeviceStateRepository;
+    private final ObjeniousDeviceLocationRepository objeniousDeviceLocationRepository;
+
+    private final BalizDeviceRepository balizDeviceRepository;
+    private final BalizDeviceDataRepository balizDeviceDataRepository;
+
+    private final ObjeniousDeviceMapper objeniousDeviceMapper;
+    private final ObjeniousDeviceStateMapper objeniousDeviceStateMapper;
+    private final ObjeniousDeviceLocationMapper objeniousDeviceLocationMapper;
+
+    private final BalizDeviceMapper balizDeviceMapper;
+    private final BalizDeviceDataMapper balizDeviceDataMapper;
 
     @Value(value = "${objenious.enpoints.devices}")
-    private String devicesUrl;
+    private String objeniousDevicesUrl;
     @Value(value = "${objenious.enpoints.devicesStates}")
-    private String devicesStatesUrl;
+    private String objeniousDevicesStatesUrl;
     @Value(value = "${objenious.enpoints.deviceLocation}")
-    private String deviceLocationUrl;
+    private String objeniousDeviceLocationUrl;
+
+    @Value(value = "${baliz.endpoints.devices}")
+    private String balizDevicesUrl;
+    @Value(value = "${baliz.endpoints.device.data}")
+    private String balizDevicesDataUrl;
 
     @Override
     public void doImport() {
-        importDevice();
-        importDevicesStates();
-        importDevicesLocations();
+        importObjeniousDevice();
+        importObjeniousDevicesStates();
+        importObjeniousDevicesLocations();
+
+        importBalizDevice();
+        importBalizDeviceData();
     }
 
     /**
      * Import devices from Objenious to MongoDB.
      */
-    private void importDevice() {
-        ResponseEntity<List<DeviceDto>> deviceDtoResponse = objeniousRestTemplate.exchange(devicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<DeviceDto>>() {});
+    private void importObjeniousDevice() {
+        ResponseEntity<List<ObjeniousDeviceDto>> deviceDtoResponse = objeniousRestTemplate.exchange(objeniousDevicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
 
         deviceDtoResponse.getBody().forEach(
-                deviceDto -> deviceRepository.save(deviceMapper.toDevice(deviceDto))
+                objeniousDeviceDto -> objeniousDeviceRepository.save(objeniousDeviceMapper.toDevice(objeniousDeviceDto))
         );
     }
 
     /**
      * Import devices states. One state per device, as per the API.
      */
-    private void importDevicesStates() {
-        List<Device> devices = deviceRepository.findAll();
+    private void importObjeniousDevicesStates() {
+        List<ObjeniousDevice> objeniousDevices = objeniousDeviceRepository.findAll();
 
-        String devicesListString = devices.stream().map(device -> device.getId()).collect(Collectors.joining( "," ));
+        String devicesListString = objeniousDevices.stream().map(objeniousDevice -> objeniousDevice.getId()).collect(Collectors.joining( "," ));
 
         UriComponentsBuilder builder = UriComponentsBuilder
-        .fromUriString(devicesStatesUrl)
+        .fromUriString(objeniousDevicesStatesUrl)
         .queryParam("id", devicesListString);
 
-        DevicesStatesWrapperDto devicesStatesWrapperDto = objeniousRestTemplate.getForObject(builder.toUriString(), DevicesStatesWrapperDto.class);
+        ObjeniousDevicesStatesWrapperDto objeniousDevicesStatesWrapperDto = objeniousRestTemplate.getForObject(builder.toUriString(), ObjeniousDevicesStatesWrapperDto.class);
 
-        devicesStatesWrapperDto.getStates().forEach(
-                deviceStateDto -> deviceStateRepository.save(deviceStateMapper.toDeviceState(deviceStateDto))
+        objeniousDevicesStatesWrapperDto.getStates().forEach(
+                deviceStateDto -> objeniousDeviceStateRepository.save(objeniousDeviceStateMapper.toDeviceState(deviceStateDto))
         );
     }
 
     /**
      * Import devices locations history. Objenious only keeps the last 10 locations.
      */
-    private void importDevicesLocations() {
-        List<Device> devices = deviceRepository.findAll();
-        devices.forEach(
-                device -> {
-                    DeviceLocationWrapperDto deviceLocationWrapperDto = objeniousRestTemplate.getForObject(MessageFormat.format(deviceLocationUrl, device.getId()), DeviceLocationWrapperDto.class);
+    private void importObjeniousDevicesLocations() {
+        List<ObjeniousDevice> objeniousDevices = objeniousDeviceRepository.findAll();
+        objeniousDevices.forEach(
+                objeniousDevice -> {
+                    ObjeniousDeviceLocationWrapperDto objeniousDeviceLocationWrapperDto = objeniousRestTemplate.getForObject(MessageFormat.format(objeniousDeviceLocationUrl, objeniousDevice.getId()), ObjeniousDeviceLocationWrapperDto.class);
 
-                    deviceLocationWrapperDto.getLocations().forEach(
+                    objeniousDeviceLocationWrapperDto.getLocations().forEach(
                             deviceLocationDto -> {
-                                if (deviceLocationRepository.findByTimestampAndDeviceId(deviceLocationDto.getTimestamp(), device.getId()) == null) {
-                                    DeviceLocation deviceLocation = deviceLocationMapper.toDeviceLocation(deviceLocationDto);
-                                    deviceLocation.setDeviceId(device.getId());
-                                    deviceLocationRepository.save(deviceLocation);
+                                if (objeniousDeviceLocationRepository.findByTimestampAndDeviceId(deviceLocationDto.getTimestamp(), objeniousDevice.getId()) == null) {
+                                    ObjeniousDeviceLocation objeniousDeviceLocation = objeniousDeviceLocationMapper.toDeviceLocation(deviceLocationDto);
+                                    objeniousDeviceLocation.setDeviceId(objeniousDevice.getId());
+                                    objeniousDeviceLocationRepository.save(objeniousDeviceLocation);
                                 }
                             }
                     );
                 }
         );
     }
+
+
+    /**
+     * Import baliz devices from magrenouille (mdr) to mongo
+     */
+    private void importBalizDevice() {
+        ResponseEntity<List<BalizDeviceDto>> balizDeviceDtoResponse = balizRestTemplate.exchange(balizDevicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
+
+        balizDeviceDtoResponse.getBody().forEach(
+                balizDeviceDto -> balizDeviceRepository.save(balizDeviceMapper.toBalizDevice(balizDeviceDto))
+        );
+    }
+
+    /**
+     * Import all baliz devices data from magrenouille to mongo
+     */
+    private void importBalizDeviceData() {
+
+        String balizDevicesListString = balizDeviceRepository.findAll().stream().map(BalizDevice::getId).collect(Collectors.joining( "," ));
+
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(balizDevicesDataUrl)
+                .queryParam("device", balizDevicesListString);
+
+        BalizDeviceDataWrapperDto balizDeviceDataWrapperDto = balizRestTemplate.getForObject(builder.toUriString(), BalizDeviceDataWrapperDto.class);
+
+        balizDeviceDataWrapperDto.getBalizDeviceDataDtos().forEach(balizDeviceDataDto -> balizDeviceDataRepository.save(balizDeviceDataMapper.toBalizDeviceData(balizDeviceDataDto)));
+    }
+
 }

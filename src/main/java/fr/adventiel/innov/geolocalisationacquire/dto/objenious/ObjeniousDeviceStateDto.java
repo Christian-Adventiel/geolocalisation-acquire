@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class DeviceStateDto {
+public class ObjeniousDeviceStateDto {
     @JsonProperty(value = "id")
     private String id;
     @JsonProperty(value = "status")
@@ -20,7 +20,7 @@ public class DeviceStateDto {
     @JsonProperty(value = "last_downlink")
     private Date lastDownlink;
     @JsonProperty(value = "data")
-    DeviceDataDto deviceData;
+    ObjeniousDeviceDataDto deviceData;
     @JsonProperty(value = "lat")
     private double lat;
     @JsonProperty(value = "lng")
@@ -28,5 +28,5 @@ public class DeviceStateDto {
     @JsonProperty(value = "geolocation_type")
     private String geolocationType;
     @JsonProperty(value = "protocol_data")
-    DeviceProtocolDataDto deviceProtocolDataDto;
+    ObjeniousDeviceProtocolDataDto objeniousDeviceProtocolDataDto;
 }

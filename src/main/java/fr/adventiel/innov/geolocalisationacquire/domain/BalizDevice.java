@@ -3,13 +3,14 @@ package fr.adventiel.innov.geolocalisationacquire.domain;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+/**
+ * Baliz device bean
+ * Created by Anto on 03/05/19.
+ */
 @Data
 @Document
-public class Device {
+public class BalizDevice {
+
     private String id;
-    private String link;
-    private String label;
-    private String status;
-    private boolean enabled;
-    private boolean recycled;
+    private String name;
 }
