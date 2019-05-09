@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class BalizDeviceData {
 
+    private long id;
     private Long timestamp;
     private Long temperature;
     private Long pressure;

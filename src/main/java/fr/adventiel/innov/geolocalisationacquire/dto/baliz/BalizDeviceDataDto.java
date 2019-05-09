@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 public class BalizDeviceDataDto {
 
+    private long id;
     private Long timestamp;
     private Long temperature;
     private Long pressure;
