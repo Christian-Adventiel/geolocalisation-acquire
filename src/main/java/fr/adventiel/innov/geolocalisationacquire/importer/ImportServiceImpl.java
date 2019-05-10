@@ -4,7 +4,7 @@ import fr.adventiel.innov.geolocalisationacquire.domain.BalizDevice;
 import fr.adventiel.innov.geolocalisationacquire.domain.ObjeniousDevice;
 import fr.adventiel.innov.geolocalisationacquire.domain.ObjeniousDeviceLocation;
 import fr.adventiel.innov.geolocalisationacquire.dto.baliz.BalizDeviceDataWrapperDto;
-import fr.adventiel.innov.geolocalisationacquire.dto.baliz.BalizDeviceDto;
+import fr.adventiel.innov.geolocalisationacquire.dto.baliz.BalizDevicesWrapperDto;
 import fr.adventiel.innov.geolocalisationacquire.dto.objenious.ObjeniousDeviceDto;
 import fr.adventiel.innov.geolocalisationacquire.dto.objenious.ObjeniousDeviceLocationWrapperDto;
 import fr.adventiel.innov.geolocalisationacquire.dto.objenious.ObjeniousDevicesStatesWrapperDto;
@@ -76,7 +76,8 @@ public class ImportServiceImpl implements ImportService {
      * Import devices from Objenious to MongoDB.
      */
     private void importObjeniousDevice() {
-        ResponseEntity<List<ObjeniousDeviceDto>> deviceDtoResponse = objeniousRestTemplate.exchange(objeniousDevicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
+        ResponseEntity<List<ObjeniousDeviceDto>> deviceDtoResponse = objeniousRestTemplate.exchange(objeniousDevicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<ObjeniousDeviceDto>>() {
+        });
 
         deviceDtoResponse.getBody().forEach(
                 objeniousDeviceDto -> objeniousDeviceRepository.save(objeniousDeviceMapper.toDevice(objeniousDeviceDto))
@@ -89,11 +90,11 @@ public class ImportServiceImpl implements ImportService {
     private void importObjeniousDevicesStates() {
         List<ObjeniousDevice> objeniousDevices = objeniousDeviceRepository.findAll();
 
-        String devicesListString = objeniousDevices.stream().map(objeniousDevice -> objeniousDevice.getId()).collect(Collectors.joining( "," ));
+        String devicesListString = objeniousDevices.stream().map(objeniousDevice -> objeniousDevice.getId()).collect(Collectors.joining(","));
 
         UriComponentsBuilder builder = UriComponentsBuilder
-        .fromUriString(objeniousDevicesStatesUrl)
-        .queryParam("id", devicesListString);
+                .fromUriString(objeniousDevicesStatesUrl)
+                .queryParam("id", devicesListString);
 
         ObjeniousDevicesStatesWrapperDto objeniousDevicesStatesWrapperDto = objeniousRestTemplate.getForObject(builder.toUriString(), ObjeniousDevicesStatesWrapperDto.class);
 
@@ -129,9 +130,9 @@ public class ImportServiceImpl implements ImportService {
      * Import baliz devices from magrenouille (mdr) to mongo
      */
     private void importBalizDevice() {
-        ResponseEntity<List<BalizDeviceDto>> balizDeviceDtoResponse = balizRestTemplate.exchange(balizDevicesUrl, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
+        ResponseEntity<BalizDevicesWrapperDto> balizDeviceDtoResponse = balizRestTemplate.exchange(balizDevicesUrl, HttpMethod.GET, null, BalizDevicesWrapperDto.class);
 
-        balizDeviceDtoResponse.getBody().forEach(
+        balizDeviceDtoResponse.getBody().getDevices().forEach(
                 balizDeviceDto -> balizDeviceRepository.save(balizDeviceMapper.toBalizDevice(balizDeviceDto))
         );
     }
@@ -141,7 +142,7 @@ public class ImportServiceImpl implements ImportService {
      */
     private void importBalizDeviceData() {
 
-        String balizDevicesListString = balizDeviceRepository.findAll().stream().map(BalizDevice::getId).collect(Collectors.joining( "," ));
+        String balizDevicesListString = balizDeviceRepository.findAll().stream().map(BalizDevice::getId).collect(Collectors.joining(","));
 
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(balizDevicesDataUrl)
@@ -150,11 +151,10 @@ public class ImportServiceImpl implements ImportService {
         BalizDeviceDataWrapperDto balizDeviceDataWrapperDto = balizRestTemplate.getForObject(builder.toUriString(), BalizDeviceDataWrapperDto.class);
 
         balizDeviceDataWrapperDto.getBalizDeviceDataDtos()
-                .forEach(balizDeviceDataDto ->  {
+                .forEach(balizDeviceDataDto -> {
                     balizDeviceDataDto.setLatitude(RandomLocationGenerator.randomLatitude());
                     balizDeviceDataDto.setLongitude(RandomLocationGenerator.randomLongitude());
                     balizDeviceDataRepository.save(balizDeviceDataMapper.toBalizDeviceData(balizDeviceDataDto));
                 });
     }
-
 }
