@@ -3,6 +3,8 @@ package fr.adventiel.innov.geolocalisationacquire.domain;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -13,6 +15,7 @@ import java.util.Date;
  */
 @Data
 @Document
+@CompoundIndexes({ @CompoundIndex(name = "balizDeviceDataUniqueIdentifier", def = "{'deviceId': 1, 'timestamp': 1}", unique = true) })
 public class BalizDeviceData {
     private String deviceId;
     private Date timestamp;
