@@ -2,7 +2,10 @@ package fr.adventiel.innov.geolocalisationacquire.domain;
 
 
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Date;
 
 /**
  * Baliz device data bean
@@ -11,9 +14,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document
 public class BalizDeviceData {
-
-    private long id;
-    private Long timestamp;
+    private String deviceId;
+    private Date timestamp;
     private Long temperature;
     private Long pressure;
     private Long humidity;

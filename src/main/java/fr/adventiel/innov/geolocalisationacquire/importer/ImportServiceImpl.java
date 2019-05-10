@@ -1,6 +1,6 @@
 package fr.adventiel.innov.geolocalisationacquire.importer;
 
-import fr.adventiel.innov.geolocalisationacquire.domain.BalizDevice;
+import fr.adventiel.innov.geolocalisationacquire.domain.BalizDeviceData;
 import fr.adventiel.innov.geolocalisationacquire.domain.ObjeniousDevice;
 import fr.adventiel.innov.geolocalisationacquire.domain.ObjeniousDeviceLocation;
 import fr.adventiel.innov.geolocalisationacquire.dto.baliz.BalizDeviceDataWrapperDto;
@@ -141,20 +141,21 @@ public class ImportServiceImpl implements ImportService {
      * Import all baliz devices data from magrenouille to mongo
      */
     private void importBalizDeviceData() {
+        balizDeviceRepository.findAll().forEach(balizDevice -> {
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromUriString(balizDevicesDataUrl)
+                    .queryParam("device", balizDevice.getId());
 
-        String balizDevicesListString = balizDeviceRepository.findAll().stream().map(BalizDevice::getId).collect(Collectors.joining(","));
-
-        UriComponentsBuilder builder = UriComponentsBuilder
-                .fromUriString(balizDevicesDataUrl)
-                .queryParam("device", balizDevicesListString);
-
-        BalizDeviceDataWrapperDto balizDeviceDataWrapperDto = balizRestTemplate.getForObject(builder.toUriString(), BalizDeviceDataWrapperDto.class);
-
-        balizDeviceDataWrapperDto.getBalizDeviceDataDtos()
-                .forEach(balizDeviceDataDto -> {
-                    balizDeviceDataDto.setLatitude(RandomLocationGenerator.randomLatitude());
-                    balizDeviceDataDto.setLongitude(RandomLocationGenerator.randomLongitude());
-                    balizDeviceDataRepository.save(balizDeviceDataMapper.toBalizDeviceData(balizDeviceDataDto));
-                });
+            BalizDeviceDataWrapperDto balizDeviceDataWrapperDto = balizRestTemplate.getForObject(builder.toUriString(), BalizDeviceDataWrapperDto.class);
+            balizDeviceDataWrapperDto.getData()
+                    .forEach(balizDeviceDataDto -> {
+                        balizDeviceDataDto.setLatitude(RandomLocationGenerator.randomLatitude());
+                        balizDeviceDataDto.setLongitude(RandomLocationGenerator.randomLongitude());
+                        BalizDeviceData balizDeviceData = balizDeviceDataMapper.toBalizDeviceData(balizDeviceDataDto);
+                        balizDeviceData.setDeviceId(balizDevice.getId());
+                        balizDeviceDataRepository.save(balizDeviceData);
+                        log.info("Data imported for baliz: " + balizDevice.getId());
+                    });
+        });
     }
 }

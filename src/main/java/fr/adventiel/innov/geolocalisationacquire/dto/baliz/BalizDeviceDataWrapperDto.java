@@ -11,5 +11,5 @@ import java.util.List;
 @Data
 public class BalizDeviceDataWrapperDto {
 
-    List<BalizDeviceDataDto> balizDeviceDataDtos;
+    List<BalizDeviceDataDto> data;
 }
