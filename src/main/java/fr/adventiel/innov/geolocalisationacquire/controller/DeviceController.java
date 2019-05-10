@@ -56,7 +56,7 @@ public class DeviceController {
 
     @CrossOrigin
     @GetMapping("/baliz/{deviceId}/data")
-    BalizDeviceDataDto getBalizData(@PathVariable final String deviceId) {
-        return balizDeviceDataMapper.toBalizDeviceDataDto(balizDeviceDataRepository.findById(deviceId));
+    List<BalizDeviceDataDto> getBalizData(@PathVariable final String deviceId) {
+        return balizDeviceDataMapper.toBalizDeviceDataDtos(balizDeviceDataRepository.findByDeviceId(deviceId));
     }
 }
