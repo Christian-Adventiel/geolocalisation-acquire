@@ -16,6 +16,7 @@ import java.util.List;
  * Controller for all devices
  */
 @RestController(value = "/devices")
+@RequestMapping("devices")
 @RequiredArgsConstructor
 public class DeviceController {
     private final ObjeniousDeviceStateRepository objeniousDeviceStateRepository;

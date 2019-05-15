@@ -3,6 +3,7 @@ package fr.adventiel.innov.geolocalisationacquire.repository;
 import fr.adventiel.innov.geolocalisationacquire.domain.BalizDeviceData;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -11,4 +12,6 @@ import java.util.List;
  */
 public interface BalizDeviceDataRepository extends MongoRepository<BalizDeviceData, String> {
     List<BalizDeviceData> findByDeviceId(String deviceId);
+
+    BalizDeviceData findByDeviceIdAndAndTimestamp(String deviceId, Date timestamp);
 }

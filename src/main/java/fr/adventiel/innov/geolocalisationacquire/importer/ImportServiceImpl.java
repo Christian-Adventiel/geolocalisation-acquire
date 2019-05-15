@@ -64,12 +64,16 @@ public class ImportServiceImpl implements ImportService {
 
     @Override
     public void doImport() {
+        // Objenious.
         importObjeniousDevice();
         importObjeniousDevicesStates();
         importObjeniousDevicesLocations();
+        log.info("Objenious import done.");
 
+        // Exotic systems.
         importBalizDevice();
         importBalizDeviceData();
+        log.info("Exotic import done.");
     }
 
     /**
@@ -149,12 +153,13 @@ public class ImportServiceImpl implements ImportService {
             BalizDeviceDataWrapperDto balizDeviceDataWrapperDto = balizRestTemplate.getForObject(builder.toUriString(), BalizDeviceDataWrapperDto.class);
             balizDeviceDataWrapperDto.getData()
                     .forEach(balizDeviceDataDto -> {
-                        balizDeviceDataDto.setLatitude(RandomLocationGenerator.randomLatitude());
-                        balizDeviceDataDto.setLongitude(RandomLocationGenerator.randomLongitude());
-                        BalizDeviceData balizDeviceData = balizDeviceDataMapper.toBalizDeviceData(balizDeviceDataDto);
-                        balizDeviceData.setDeviceId(balizDevice.getId());
-                        balizDeviceDataRepository.save(balizDeviceData);
-                        log.info("Data imported for baliz: " + balizDevice.getId());
+                        if (balizDeviceDataRepository.findByDeviceIdAndAndTimestamp(balizDevice.getId(), balizDeviceDataDto.getTimestamp()) == null) {
+                            balizDeviceDataDto.setLatitude(RandomLocationGenerator.randomLatitude());
+                            balizDeviceDataDto.setLongitude(RandomLocationGenerator.randomLongitude());
+                            BalizDeviceData balizDeviceData = balizDeviceDataMapper.toBalizDeviceData(balizDeviceDataDto);
+                            balizDeviceData.setDeviceId(balizDevice.getId());
+                            balizDeviceDataRepository.save(balizDeviceData);
+                        }
                     });
         });
     }
